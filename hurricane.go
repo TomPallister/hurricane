@@ -16,23 +16,30 @@ type Features struct {
 	provider FeatureProvider
 }
 
-// FeatureProvider is an interface to the thing that actually finds out if a feature is on or not
+// FeatureProvider is an interface to the thing that actually finds out if a feature is on or not.
+// This public to allow people to implement their own if they want
 type FeatureProvider interface {
 	Enabled(key string) (bool, error)
 }
 
-// NewFeatures creates a pointer to features it takes a provider and a logger
+// NewFeatures creates a pointer to features it takes a given FeatureProvider
 func NewFeatures(provider FeatureProvider) *Features {
 	features := Features{provider: provider}
 	return &features
 }
 
+// NewFileFeatures creates a features that reads the feature from the file at the path location
+// This file must be in the json structure {"featureName":false,"my-feature":false} or it will
+// not work
 func NewFileFeatures(path string) *Features {
 	provider := &fileFeatureProvider{path: path}
 	features := Features{provider: provider}
 	return &features
 }
 
+// NewWatchingFileFeatures creates a features that watches the feature from the file at the path location
+// This file must be in the json structure {"featureName":false,"my-feature":false} or it will
+// not work.
 func NewWatchingFileFeatures(path string) *Features {
 	provider := &watchingFileFeatureProvider{path: path}
 	go provider.start()
