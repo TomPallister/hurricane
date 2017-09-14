@@ -3,6 +3,7 @@
 ## Credit
 
 fsnotify - go get github.com/fsnotify/fsnotify
+sys - go get golang.org/x/sys
 
 ## How to
 
