@@ -1,0 +1,16 @@
+{
+	"ImportPath": "github.com/TomPallister/hurricane",
+	"GoVersion": "go1.9",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/fsnotify/fsnotify",
+			"Comment": "v1.4.2-6-g4da3e2c",
+			"Rev": "4da3e2cfbabc9f751898f250b49f2439785783a1"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "062cd7e4e68206d8bab9b18396626e855c992658"
+		}
+	]
+}
