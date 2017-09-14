@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -11,7 +12,8 @@ import (
 var features map[string]bool
 
 type watchingFileFeatureProvider struct {
-	path string
+	path   string
+	logger *log.Logger
 }
 
 func (p *watchingFileFeatureProvider) makeFeatures() error {
@@ -32,7 +34,7 @@ func (p *watchingFileFeatureProvider) start() error {
 	p.makeFeatures()
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		logger.Fatal(err)
+		p.logger.Fatal(err)
 	}
 	defer watcher.Close()
 
@@ -40,21 +42,21 @@ func (p *watchingFileFeatureProvider) start() error {
 	go func() {
 		for {
 			select {
-			case <-watcher.Events:
-				// logger.Println("event:", event)
-				// if event.Op&fsnotify.Write == fsnotify.Write {
-				// 	logger.Println("modified file:", event.Name)
-				// }
+			case event := <-watcher.Events:
+				p.logger.Println("event:", event)
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					p.logger.Println("modified file:", event.Name)
+				}
 				p.makeFeatures()
 			case err := <-watcher.Errors:
-				logger.Println("error:", err)
+				p.logger.Println("error:", err)
 			}
 		}
 	}()
 
 	err = watcher.Add(p.path)
 	if err != nil {
-		logger.Fatal(err)
+		p.logger.Fatal(err)
 	}
 	<-done
 	return nil
@@ -64,7 +66,7 @@ func (p *watchingFileFeatureProvider) Enabled(key string) (bool, error) {
 	enabled, ok := features[key]
 	if ok == false {
 		message := fmt.Sprintf("key %v does not exist", key)
-		logger.Printf(message)
+		p.logger.Printf(message)
 		return false, nil
 	}
 

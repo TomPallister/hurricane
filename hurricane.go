@@ -2,18 +2,16 @@ package hurricane
 
 import (
 	"log"
-	"os"
 )
 
-var logger *log.Logger
-
 func init() {
-	logger = log.New(os.Stderr, "Log: ", log.Ldate|log.Ltime|log.Lshortfile)
+	//logger = log.New(os.Stderr, "Log: ", log.Ldate|log.Ltime|log.Lshortfile)
 }
 
 // Features is holds the dependencies required to identify if features are on or not
 type Features struct {
 	provider FeatureProvider
+	logger   *log.Logger
 }
 
 // FeatureProvider is an interface to the thing that actually finds out if a feature is on or not.
@@ -23,15 +21,15 @@ type FeatureProvider interface {
 }
 
 // NewFeatures creates a pointer to features it takes a given FeatureProvider
-func NewFeatures(provider FeatureProvider) *Features {
-	features := Features{provider: provider}
+func NewFeatures(provider FeatureProvider, logger *log.Logger) *Features {
+	features := Features{provider: provider, logger: logger}
 	return &features
 }
 
 // NewFileFeatures creates a features that reads the feature from the file at the path location
 // This file must be in the json structure {"featureName":false,"my-feature":false} or it will
 // not work
-func NewFileFeatures(path string) *Features {
+func NewFileFeatures(path string, logger *log.Logger) *Features {
 	provider := &fileFeatureProvider{path: path}
 	features := Features{provider: provider}
 	return &features
@@ -40,8 +38,8 @@ func NewFileFeatures(path string) *Features {
 // NewWatchingFileFeatures creates a features that watches the feature from the file at the path location
 // This file must be in the json structure {"featureName":false,"my-feature":false} or it will
 // not work.
-func NewWatchingFileFeatures(path string) *Features {
-	provider := &watchingFileFeatureProvider{path: path}
+func NewWatchingFileFeatures(path string, logger *log.Logger) *Features {
+	provider := &watchingFileFeatureProvider{path: path, logger: logger}
 	go provider.start()
 	return &Features{provider: provider}
 }
@@ -52,6 +50,6 @@ func (features *Features) Enabled(key string) bool {
 	if err == nil {
 		return enabled
 	}
-	logger.Printf("Error getting value for key %v. Error is %v", key, err)
+	features.logger.Printf("Error getting value for key %v. Error is %v", key, err)
 	return false
 }

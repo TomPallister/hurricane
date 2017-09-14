@@ -20,13 +20,14 @@ import (
 )
 
 func main(){
+	logger := log.New(os.Stderr, "Log: ", log.Ldate|log.Ltime|log.Lshortfile)
     // This will build a features that reads from the file in the given path
-    f := hurricane.NewFileFeatures(path)
+    f := hurricane.NewFileFeatures(path, logger)
     // This will build a features that watches the file in the given path
-	f := hurricane.NewWatchingFileFeatures(path)
+	f := hurricane.NewWatchingFileFeatures(path, logger)
     //This will build a features that lets you pass any provider
 	p := FakeProvider{enabled: true}
-	f := hurricane.NewFeatures(p)
+	f := hurricane.NewFeatures(p, logger)
     //get a feature status
 	enabled := f.Enabled("my-feature")
 }
