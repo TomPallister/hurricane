@@ -1,7 +1,9 @@
 package hurricane_test
 
 import (
+	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -43,6 +45,21 @@ func TestReturnsTrue(t *testing.T) {
 	p := FakeProvider{enabled: true}
 	f := hurricane.NewFeatures(p, l)
 	enabled := f.Enabled("my-feature")
+	if enabled == false {
+		t.Fatalf("Should be true")
+	}
+}
+
+func TestFileFeatureProvider(t *testing.T) {
+	path := "features.json"
+	featureName := "my-feature"
+	features := map[string]bool{featureName: true}
+	b, _ := json.Marshal(features)
+	_ = ioutil.WriteFile(path, b, 0644)
+	l := log.New(os.Stdout, "Log: ", log.Ldate|log.Ltime|log.Lshortfile)
+	p := hurricane.NewFileFeatureProvider(path)
+	f := hurricane.NewFeatures(p, l)
+	enabled := f.Enabled(featureName)
 	if enabled == false {
 		t.Fatalf("Should be true")
 	}
